@@ -10,7 +10,7 @@ func RegisterUserRouter(r *gin.Engine) {
 	group := r.Group("/user")
 
 	obj := controllers.NewUserController()
-	group.POST("/register", obj.CreateUser)
+	group.POST("/register", obj.RegisterUser)
 	group.POST("/login", obj.LoginUser)
 	group.GET("/info", obj.GetUser)
 	group.PUT("/update", obj.UpdateUser)

@@ -6,6 +6,7 @@ const Success = 0 // 成功
 const (
 	ErrUserNotFound = iota + 1000
 	ErrUserInvalidPassword
+	ErrUserUnauthorized
 )
 
 // 文章模块错误码（2xxx）
