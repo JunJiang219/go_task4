@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go_task4/middlewares"
 	"github.com/go_task4/models"
-	"github.com/go_task4/pkg/errcode"
 	"github.com/go_task4/routers"
 )
 
@@ -16,10 +15,7 @@ func main() {
 	r := gin.Default()
 	r.Use(middlewares.JWTAuthMiddleware)
 	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    errcode.Success,
-			"message": "欢迎访问首页",
-		})
+		c.JSON(http.StatusOK, gin.H{"message": "欢迎访问首页"})
 	})
 	routers.RegisterUserRouter(r)
 	r.Run()

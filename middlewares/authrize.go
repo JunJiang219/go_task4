@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go_task4/pkg/errcode"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -33,10 +32,7 @@ func JWTAuthMiddleware(c *gin.Context) {
 
 	tokenString := c.Request.Header.Get("Authorization")
 	if tokenString == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"code":    errcode.ErrUserUnauthorized,
-			"message": "no token",
-		})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Request without authorization"})
 		return
 	}
 
@@ -45,28 +41,19 @@ func JWTAuthMiddleware(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"code":    errcode.ErrUserUnauthorized,
-			"message": "token parse error",
-		})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token parse error"})
 		return
 	}
 
 	var claims *MyCustomClaims = nil
 	var ok bool = false
 	if claims, ok = token.Claims.(*MyCustomClaims); !ok || !token.Valid {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"code":    errcode.ErrUserUnauthorized,
-			"message": "token invalid",
-		})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token invalid"})
 		return
 	}
 
 	if claims.ExpiresAt.Before(time.Now()) {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"code":    errcode.ErrUserUnauthorized,
-			"message": "token expired",
-		})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token expired"})
 		return
 	}
 
