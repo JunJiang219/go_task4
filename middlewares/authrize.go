@@ -13,6 +13,8 @@ var skipAuthPaths = []string{
 	"/",
 	"/user/register",
 	"/user/login",
+	"/posts/info-list",
+	"/posts/info",
 }
 
 var jWTAuthSecretKey = []byte("task4_secret")

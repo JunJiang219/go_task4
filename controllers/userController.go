@@ -66,7 +66,7 @@ func (obj UserController) LoginUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": tokenStr})
 }
 
-func (obj UserController) GetUser(c *gin.Context) {
+func (obj UserController) ReadUser(c *gin.Context) {
 	c.String(http.StatusOK, "读取用户")
 }
 

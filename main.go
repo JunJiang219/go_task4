@@ -18,5 +18,6 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "欢迎访问首页"})
 	})
 	routers.RegisterUserRouter(r)
+	routers.RegisterPostsRouter(r)
 	r.Run()
 }

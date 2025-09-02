@@ -10,6 +10,6 @@ type Posts struct {
 	Comments []Comment
 }
 
-// func (obj Posts) TableName() string {
-// 	return "posts"
-// }
+func (obj Posts) TableName() string {
+	return "posts"
+}
