@@ -21,12 +21,12 @@ func (obj PostsController) CreatePosts(c *gin.Context) {
 	title := c.PostForm("title")
 	content := c.PostForm("content")
 	if title == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Request body missing param title"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Request body missing title"})
 		return
 	}
 
 	if content == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Request body missing param content"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Request body missing content"})
 		return
 	}
 
@@ -52,8 +52,8 @@ func (obj PostsController) ReadPostsList(c *gin.Context) {
 	}
 
 	type PostsIntro struct {
-		PostsID uint
-		Title   string
+		PostsID uint   `json:"posts_id"`
+		Title   string `json:"title"`
 	}
 
 	var list = make([]PostsIntro, len(pl))
@@ -66,9 +66,9 @@ func (obj PostsController) ReadPostsList(c *gin.Context) {
 }
 
 func (obj PostsController) ReadPosts(c *gin.Context) {
-	idStr := c.PostForm("posts_id")
+	idStr := c.Query("posts_id")
 	if idStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Request body missing param posts_id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Request params missing posts_id"})
 		return
 	}
 
@@ -82,7 +82,7 @@ func (obj PostsController) ReadPosts(c *gin.Context) {
 	posts.ID = uint(postsID)
 
 	if err := models.GetDB().Preload("Comments").Find(&posts).Error; err != nil {
-		errStr, _ := fmt.Printf("Failed to get posts, id = %v", postsID)
+		errStr := fmt.Sprintf("Failed to get posts, id = %v", postsID)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": errStr})
 		return
 	}
@@ -93,7 +93,7 @@ func (obj PostsController) ReadPosts(c *gin.Context) {
 func (obj PostsController) UpdatePosts(c *gin.Context) {
 	idStr := c.PostForm("posts_id")
 	if idStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Request body missing param posts_id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Request body missing posts_id"})
 		return
 	}
 
@@ -106,7 +106,7 @@ func (obj PostsController) UpdatePosts(c *gin.Context) {
 	title := c.PostForm("title")
 	content := c.PostForm("content")
 	if title == "" && content == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Request body missing update param title or content"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Request body missing title or content"})
 		return
 	}
 
@@ -114,13 +114,13 @@ func (obj PostsController) UpdatePosts(c *gin.Context) {
 	posts := models.Posts{}
 	posts.ID = uint(postsID)
 	if err := models.GetDB().First(&posts).Error; err != nil {
-		errStr, _ := fmt.Printf("Failed to get posts, id = %v", postsID)
+		errStr := fmt.Sprintf("Failed to get posts, id = %v", postsID)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": errStr})
 		return
 	}
 
 	if posts.UserID != user_id {
-		errStr, _ := fmt.Printf("Can't update other's posts, {my: %v, other: %v}", user_id, posts.UserID)
+		errStr := fmt.Sprintf("Can't update other's posts, {my: %v, other: %v}", user_id, posts.UserID)
 		c.JSON(http.StatusForbidden, gin.H{"error": errStr})
 		return
 	}
@@ -136,9 +136,9 @@ func (obj PostsController) UpdatePosts(c *gin.Context) {
 }
 
 func (obj PostsController) DeletePosts(c *gin.Context) {
-	idStr := c.PostForm("posts_id")
+	idStr := c.Query("posts_id")
 	if idStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Request body missing param posts_id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Request params missing posts_id"})
 		return
 	}
 
@@ -152,13 +152,13 @@ func (obj PostsController) DeletePosts(c *gin.Context) {
 	posts := models.Posts{}
 	posts.ID = uint(postsID)
 	if err := models.GetDB().First(&posts).Error; err != nil {
-		errStr, _ := fmt.Printf("Failed to get posts, id = %v", postsID)
+		errStr := fmt.Sprintf("Failed to get posts, id = %v", postsID)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": errStr})
 		return
 	}
 
 	if posts.UserID != user_id {
-		errStr, _ := fmt.Printf("Can't delete other's posts, {my: %v, other: %v}", user_id, posts.UserID)
+		errStr := fmt.Sprintf("Can't delete other's posts, {my: %v, other: %v}", user_id, posts.UserID)
 		c.JSON(http.StatusForbidden, gin.H{"error": errStr})
 		return
 	}

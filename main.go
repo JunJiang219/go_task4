@@ -19,5 +19,6 @@ func main() {
 	})
 	routers.RegisterUserRouter(r)
 	routers.RegisterPostsRouter(r)
+	routers.RegisterCommentRouter(r)
 	r.Run()
 }

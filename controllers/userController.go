@@ -22,6 +22,11 @@ func (obj UserController) RegisterUser(c *gin.Context) {
 		return
 	}
 
+	if user.Username == "" || user.Password == "" || user.Email == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing param username, password or email"})
+		return
+	}
+
 	// 加密密码
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {

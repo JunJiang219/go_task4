@@ -15,6 +15,7 @@ var skipAuthPaths = []string{
 	"/user/login",
 	"/posts/info-list",
 	"/posts/info",
+	"/comment/info-list",
 }
 
 var jWTAuthSecretKey = []byte("task4_secret")
