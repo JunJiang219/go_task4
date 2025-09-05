@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go_task4/middlewares"
 	"github.com/go_task4/models"
+	"github.com/go_task4/utils"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -36,6 +38,10 @@ func (obj UserController) RegisterUser(c *gin.Context) {
 	user.Password = string(hashedPassword)
 
 	if err := models.GetDB().Create(&user).Error; err != nil {
+		utils.GetLogger().Warn(
+			"RegisterUser failed",
+			zap.Any("user", user),
+		)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
@@ -52,18 +58,28 @@ func (obj UserController) LoginUser(c *gin.Context) {
 
 	storedUser := models.User{}
 	if err := models.GetDB().Where("username = ?", user.Username).First(&storedUser).Error; err != nil {
+		utils.GetLogger().Info(
+			"LoginUser failed, wrong username",
+			zap.String("username", user.Username),
+		)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username"})
 		return
 	}
 
 	// 验证密码
 	if err := bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(user.Password)); err != nil {
+		utils.GetLogger().Info(
+			"LoginUser failed, wrong password",
+		)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid password"})
 		return
 	}
 
 	tokenStr, err := middlewares.NewJWTAuth(storedUser.ID)
 	if err != nil {
+		utils.GetLogger().Warn(
+			"LoginUser failed, failed to generate token",
+		)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
 	}

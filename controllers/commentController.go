@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go_task4/models"
+	"github.com/go_task4/utils"
+	"go.uber.org/zap"
 )
 
 type CommentController struct{}
@@ -41,6 +43,11 @@ func (obj CommentController) CreateComment(c *gin.Context) {
 	}
 
 	if err := models.GetDB().Create(&comment).Error; err != nil {
+		utils.GetLogger().Error(
+			"CreateComment failed",
+			zap.String("error", err.Error()),
+			zap.Any("comment", comment),
+		)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create comment"})
 		return
 	}
@@ -63,6 +70,11 @@ func (obj CommentController) ReadCommentList(c *gin.Context) {
 
 	var cs []models.Comment
 	if err := models.GetDB().Where("posts_id = ?", postsID).Find(&cs).Error; err != nil {
+		utils.GetLogger().Error(
+			"ReadCommentList failed",
+			zap.String("error", err.Error()),
+			zap.Uint("posts_id", uint(postsID)),
+		)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get posts list"})
 		return
 	}

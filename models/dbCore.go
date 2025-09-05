@@ -1,9 +1,10 @@
 package models
 
 import (
-	"fmt"
 	"sync"
 
+	"github.com/go_task4/utils"
+	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -19,7 +20,10 @@ func GetDB() *gorm.DB {
 		var err error
 		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 		if err != nil {
-			fmt.Printf("数据库连接出错：%v\n", err)
+			utils.GetLogger().Error(
+				"数据库连接出错",
+				zap.String("error", err.Error()),
+			)
 			return
 		}
 	})

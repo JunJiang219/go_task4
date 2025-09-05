@@ -7,6 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go_task4/models"
+	"github.com/go_task4/utils"
+	"go.uber.org/zap"
 	"gorm.io/gorm/clause"
 )
 
@@ -37,6 +39,11 @@ func (obj PostsController) CreatePosts(c *gin.Context) {
 	}
 
 	if err := models.GetDB().Create(&posts).Error; err != nil {
+		utils.GetLogger().Error(
+			"CreatePosts failed",
+			zap.String("error", err.Error()),
+			zap.Any("posts", posts),
+		)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create posts"})
 		return
 	}
@@ -82,6 +89,10 @@ func (obj PostsController) ReadPosts(c *gin.Context) {
 	posts.ID = uint(postsID)
 
 	if err := models.GetDB().Preload("Comments").Find(&posts).Error; err != nil {
+		utils.GetLogger().Info(
+			"ReadPosts failed",
+			zap.Uint("postsID", posts.ID),
+		)
 		errStr := fmt.Sprintf("Failed to get posts, id = %v", postsID)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": errStr})
 		return
@@ -114,12 +125,21 @@ func (obj PostsController) UpdatePosts(c *gin.Context) {
 	posts := models.Posts{}
 	posts.ID = uint(postsID)
 	if err := models.GetDB().First(&posts).Error; err != nil {
+		utils.GetLogger().Info(
+			"UpdatePosts failed -- no posts record",
+			zap.Uint("posts_id", posts.ID),
+		)
 		errStr := fmt.Sprintf("Failed to get posts, id = %v", postsID)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": errStr})
 		return
 	}
 
 	if posts.UserID != user_id {
+		utils.GetLogger().Warn(
+			"UpdatePosts not allowed",
+			zap.Uint("user_id", user_id),
+			zap.Uint("belong_userID", posts.UserID),
+		)
 		errStr := fmt.Sprintf("Can't update other's posts, {my: %v, other: %v}", user_id, posts.UserID)
 		c.JSON(http.StatusForbidden, gin.H{"error": errStr})
 		return
@@ -128,6 +148,11 @@ func (obj PostsController) UpdatePosts(c *gin.Context) {
 	posts.Title = title
 	posts.Content = content
 	if err := models.GetDB().Updates(&posts).Error; err != nil {
+		utils.GetLogger().Error(
+			"UpdatePosts failed",
+			zap.String("error", err.Error()),
+			zap.Any("posts", posts),
+		)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -152,18 +177,32 @@ func (obj PostsController) DeletePosts(c *gin.Context) {
 	posts := models.Posts{}
 	posts.ID = uint(postsID)
 	if err := models.GetDB().First(&posts).Error; err != nil {
+		utils.GetLogger().Info(
+			"DeletePosts failed -- no posts record",
+			zap.Uint("posts_id", posts.ID),
+		)
 		errStr := fmt.Sprintf("Failed to get posts, id = %v", postsID)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": errStr})
 		return
 	}
 
 	if posts.UserID != user_id {
+		utils.GetLogger().Warn(
+			"DeletePosts not allowed",
+			zap.Uint("user_id", user_id),
+			zap.Uint("belong_userID", posts.UserID),
+		)
 		errStr := fmt.Sprintf("Can't delete other's posts, {my: %v, other: %v}", user_id, posts.UserID)
 		c.JSON(http.StatusForbidden, gin.H{"error": errStr})
 		return
 	}
 
 	if err := models.GetDB().Select(clause.Associations).Delete(&posts).Error; err != nil {
+		utils.GetLogger().Error(
+			"DeletePosts failed",
+			zap.String("error", err.Error()),
+			zap.Any("posts", posts),
+		)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
